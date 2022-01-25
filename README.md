@@ -1,1 +1,1 @@
-# go-rtp-client
+# go-rtp
