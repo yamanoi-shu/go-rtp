@@ -87,16 +87,16 @@ func (h *RTPHeader) Unmarshal(buf []byte) {
 	h.Extention = buf[0]>>4&1 == 1
 
 	// (bit: 4 ~ 7)
-	h.CsrcCnt = buf[0] & 0xF
+	h.CsrcCnt = buf[0] & 0xf // (0xf == 1111)
 
-	// (octed: 2)
+	// (octed: 1)
 	// marker(bit: 0)
 	h.Marker = buf[1]>>7 == 1
 
 	// payload type(bit: 1 ~ 7)
-	h.PayloadType = buf[1] & 0x7f
+	h.PayloadType = buf[1] & 0x7f // (0x7f == 01111111)
 
-	// sequence number(octet: 3 ~ 4)
+	// sequence number(octet: 2 ~ 3)
 	h.SequenceNum = binary.BigEndian.Uint16(buf[2:4])
 
 	// timestamp (octet: 4 ~ 7)
@@ -104,6 +104,7 @@ func (h *RTPHeader) Unmarshal(buf []byte) {
 	// ssrc (octet: 8 ~ 11)
 	h.SSRC = binary.BigEndian.Uint32(buf[8:12])
 
+	// csrc (octet: 12 ~ )
 	h.CSRC = make([]uint32, 0, h.CsrcCnt)
 
 	octetCnt := 12
