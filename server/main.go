@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"go-rtp/packet"
 	"log"
 	"net"
 )
@@ -22,15 +23,20 @@ func main() {
 
 	fmt.Println("listening.....")
 
+	var clientCnt int
+
 	var buf = make([]byte, 1024)
 	for {
 		n, addr, err := conn.ReadFromUDP(buf)
+		if clientCnt == 0 {
+			fmt.Println("receive from address: ", addr)
+		}
+		clientCnt++
 
 		if err != nil {
 			log.Fatal(err)
 		}
 
-		fmt.Println("receive from address: ", addr)
 		go handleUDP(buf[:n])
 		buf = make([]byte, 1024)
 	}
@@ -38,5 +44,8 @@ func main() {
 
 func handleUDP(buf []byte) {
 
-	fmt.Println(string(buf))
+	h := &packet.RTPHeader{}
+	h.Unmarshal(buf)
+	fmt.Println(h.String())
+	fmt.Println()
 }
