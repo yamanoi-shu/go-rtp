@@ -15,6 +15,7 @@ type RTPHeader struct {
 	SequenceNum uint16
 	Timestamp   uint32
 	SSRC        uint32
+	CSRC        []uint32
 }
 
 type RTPPacket struct {
@@ -100,9 +101,18 @@ func (h *RTPHeader) Unmarshal(buf []byte) {
 
 	// timestamp (octet: 4 ~ 7)
 	h.Timestamp = binary.BigEndian.Uint32(buf[4:8])
-	// timestamp (octet: 8 ~ 11)
+	// ssrc (octet: 8 ~ 11)
 	h.SSRC = binary.BigEndian.Uint32(buf[8:12])
-	fmt.Println(len(buf))
+
+	h.CSRC = make([]uint32, 0, h.CsrcCnt)
+
+	octetCnt := 12
+
+	for i := uint8(0); i < h.CsrcCnt; i++ {
+		csrc := binary.BigEndian.Uint32(buf[octetCnt : octetCnt+4])
+		h.CSRC = append(h.CSRC, csrc)
+		octetCnt += 4
+	}
 }
 
 func (h *RTPHeader) String() string {
@@ -116,5 +126,6 @@ func (h *RTPHeader) String() string {
 	out += fmt.Sprintf("Sequence Number: %v\n", h.SequenceNum)
 	out += fmt.Sprintf("Timestamp: %v\n", h.Timestamp)
 	out += fmt.Sprintf("SSRC: %v\n", h.SSRC)
+	out += fmt.Sprintf("CSRC: %v\n", h.CSRC)
 	return out
 }
