@@ -3,6 +3,7 @@ package packet
 import (
 	"encoding/binary"
 	"fmt"
+	"go-rtp/packet/h264"
 )
 
 type RTPHeader struct {
@@ -18,19 +19,20 @@ type RTPHeader struct {
 	CSRC        []uint32
 }
 
+type RTPPayload interface {
+	Packetize() (buf []byte)
+	Depacketize(buf []byte)
+}
+
 type RTPPacket struct {
-	Header  RTPHeader
-	Payload []byte
+	Header  *RTPHeader
+	Payload *h264.H264Payload
 }
 
 func NewRTPPacket() *RTPPacket {
 	return &RTPPacket{
-		Header: RTPHeader{
-			Version:   2,
-			Padding:   true,
-			Extention: false,
-			Marker:    false,
-		},
+		Header:  &RTPHeader{},
+		Payload: &h264.H264Payload{},
 	}
 }
 
@@ -58,7 +60,7 @@ func (h *RTPHeader) Marshal() (buf []byte) {
 	return
 }
 
-func (h *RTPHeader) Unmarshal(buf []byte) {
+func (h *RTPHeader) Unmarshal(buf []byte) []byte {
 	/*
 		The RTP header has the following format:
 
@@ -114,6 +116,8 @@ func (h *RTPHeader) Unmarshal(buf []byte) {
 		h.CSRC = append(h.CSRC, csrc)
 		octetCnt += 4
 	}
+
+	return buf[octetCnt:]
 }
 
 func (h *RTPHeader) String() string {

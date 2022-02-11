@@ -44,8 +44,10 @@ func main() {
 
 func handleUDP(buf []byte) {
 
-	h := &packet.RTPHeader{}
-	h.Unmarshal(buf)
-	fmt.Println(h.String())
+	p := packet.NewRTPPacket()
+	buf = p.Header.Unmarshal(buf)
+	buf = p.Payload.Depacketize(buf)
+	fmt.Println(p.Header.String())
+	fmt.Println(p.Payload.String())
 	fmt.Println()
 }
